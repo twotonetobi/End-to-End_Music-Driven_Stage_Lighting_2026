@@ -2,7 +2,7 @@
 
 **Paper:** End-to-End Music-Driven Stage Lighting: A Co-Creative Framework  
 **Author:** Tobias Wursthorn  
-**Conference:** PETRA 2025  
+**Conference:** PETRAE 2025  
 **Repository:** [https://github.com/twotonetobi/End-to-End_Music-Driven_Stage_Lighting_2026](https://github.com/twotonetobi/End-to-End_Music-Driven_Stage_Lighting_2026)
 
 ---

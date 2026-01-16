@@ -1,4 +1,4 @@
-# Evaluation Results - PETRA 2025 Paper
+# Evaluation Results - PETRAE 2025 Paper
 
 > **Last Updated:** 2026-01-14
 > **Status:** TABLE 2 and TABLE 3 COMPLETE

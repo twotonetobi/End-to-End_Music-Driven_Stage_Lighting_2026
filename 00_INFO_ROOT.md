@@ -2,7 +2,7 @@
 
 > **Start here.** This file maps all documentation in this repository.  
 > **Repository:** [End-to-End Music-Driven Stage Lighting](https://github.com/twotonetobi/End-to-End_Music-Driven_Stage_Lighting_2026)  
-> **Paper:** PETRA 2025 - "End-to-End Music-Driven Stage Lighting: A Co-Creative Framework"
+> **Paper:** PETRAE 2025 - "End-to-End Music-Driven Stage Lighting: A Co-Creative Framework"
 
 ---
 
