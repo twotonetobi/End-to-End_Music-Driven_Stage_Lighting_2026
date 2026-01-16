@@ -1,0 +1,182 @@
+# Rig C: Mixed Heterogeneous Setup
+# Combination of moving heads, LED bars, and wash fixtures
+
+name: "Rig C - Mixed Heterogeneous"
+description: "Mixed rig combining Robe BMFL spots, GLP bars, and generic LED washes for versatile applications"
+
+# Total fixture count
+total_fixtures: 18
+
+# Fixture groups (matching lx1, lx2, lx3 semantic groups)
+groups:
+  lx1:
+    name: "Key Spots"
+    fixture_count: 4
+    fixture_type: "Robe BMFL Spot"
+    dmx_mode: "mode_1"
+    dmx_channels_per_fixture: 37
+    channel_layout:
+      pan: [1, 2]
+      tilt: [3, 4]
+      dimmer: [22, 23]
+      cyan: 7
+      magenta: 8
+      yellow: 9
+      color_wheel: 10
+      gobo_wheel: 11
+      shutter: 21
+    capabilities:
+      pan_range: 540
+      tilt_range: 280
+      color_system: "CMY"
+      dimmer_bits: 16
+      has_color_wheel: true
+      has_gobo: true
+
+  lx2:
+    name: "LED Bars"
+    fixture_count: 6
+    fixture_type: "GLP Impression X4 Bar 20"
+    dmx_mode: "full_pixel"
+    dmx_channels_per_fixture: 89
+    pixels_per_fixture: 20
+    channel_layout:
+      master_dimmer: 1
+      strobe: 2
+      pixel_start: 5
+      channels_per_pixel: 4
+      color_order: "RGBW"
+    capabilities:
+      color_system: "RGBW"
+      dimmer_bits: 8
+      has_pixel_control: true
+      pixel_count: 20
+
+  lx3:
+    name: "Wash Fixtures"
+    fixture_count: 8
+    fixture_type: "Generic LED Par"
+    dmx_mode: "8ch"
+    dmx_channels_per_fixture: 8
+    channel_layout:
+      red: 1
+      green: 2
+      blue: 3
+      white: 4
+      amber: 5
+      uv: 6
+      dimmer: 7
+      strobe: 8
+    capabilities:
+      color_system: "RGBWAU"  # RGB + White + Amber + UV
+      dimmer_bits: 8
+      has_pixel_control: false
+
+# Abstract-to-physical mapping
+mapping:
+  virtual_led_count: 8
+  
+  # Different strategies per group
+  strategies:
+    lx1:
+      method: "distribute"
+      interpolation: "nearest"
+    lx2:
+      method: "interpolate"
+      physical_leds: 120  # 6 fixtures x 20 pixels
+      pixel_decimation: 3
+    lx3:
+      method: "distribute"
+      interpolation: "nearest"
+
+# Color conversion (different per fixture type)
+color_conversion:
+  lx1:  # BMFL spots - CMY
+    method: "rgb_to_cmy_subtractive"
+    formulas:
+      cyan: "1.0 - R"
+      magenta: "1.0 - G"
+      yellow: "1.0 - B"
+  
+  lx2:  # LED bars - RGBW
+    method: "rgb_to_rgbw_hybrid"
+    strategy: "white_extraction"
+    formulas:
+      white: "min(R, G, B)"
+      red: "R - W"
+      green: "G - W"
+      blue: "B - W"
+  
+  lx3:  # LED pars - RGBWAU
+    method: "rgb_to_rgbwau"
+    strategy: "expanded_gamut"
+    formulas:
+      # Basic RGB
+      red: "R * (1 - amber_mix)"
+      green: "G"
+      blue: "B * (1 - uv_mix)"
+      # White extraction
+      white: "min(R, G, B) * white_blend"
+      # Warm tones get amber boost
+      amber: "max(0, R - G) * amber_mix"
+      # Cool tones get UV boost
+      uv: "max(0, B - R) * uv_mix"
+    parameters:
+      white_blend: 0.3
+      amber_mix: 0.2
+      uv_mix: 0.15
+
+# Position presets (primarily for lx1 spots)
+position_presets:
+  Pos01:
+    description: "Center Stage"
+    lx1: { pan: 0.5, tilt: 0.5 }
+    lx2: { coverage: [0.3, 0.7] }
+    lx3: { zones: [0.4, 0.6] }
+  Pos02:
+    description: "Full Stage"
+    lx1: { pan: 0.5, tilt: 0.4 }
+    lx2: { coverage: [0.0, 1.0] }
+    lx3: { zones: [0.0, 1.0] }
+  Pos03:
+    description: "Stage Left Focus"
+    lx1: { pan: 0.25, tilt: 0.5 }
+    lx2: { coverage: [0.0, 0.5] }
+    lx3: { zones: [0.0, 0.4] }
+  Pos04:
+    description: "Stage Right Focus"
+    lx1: { pan: 0.75, tilt: 0.5 }
+    lx2: { coverage: [0.5, 1.0] }
+    lx3: { zones: [0.6, 1.0] }
+
+# Re-extraction configuration
+extraction:
+  # Different sources per group due to fixture differences
+  lx1:
+    intensity_source: "dimmer"
+    color_source: "cmy_to_rgb"
+  lx2:
+    intensity_source: "pixel_brightness"
+    color_source: "rgbw_to_rgb"
+  lx3:
+    intensity_source: "dimmer"
+    color_source: "rgbwau_to_rgb"
+  
+  # Unified output resolution
+  spatial_resolution: 8
+  
+  # Weighting for combined metrics
+  group_weights:
+    lx1: 0.4  # Spots are prominent
+    lx2: 0.35 # Bars provide ambient
+    lx3: 0.25 # Washes are fill
+
+# Notes for evaluation
+notes: |
+  This mixed rig tests the abstraction layer's ability to handle:
+  1. Different color mixing systems (CMY vs RGB vs RGBW)
+  2. Different control granularities (moving head vs pixel array vs simple wash)
+  3. Different dimmer resolutions (16-bit vs 8-bit)
+  
+  The key challenge is maintaining intention fidelity when the same abstract
+  values produce different physical outputs across fixture types.

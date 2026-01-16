@@ -1,0 +1,133 @@
+# Rig A: Robe BMFL Beam-Focused Setup
+# High-end moving head fixtures for precise beam effects
+
+name: "Rig A - BMFL Beam Setup"
+description: "8x Robe BMFL fixtures in beam-focused configuration for concert/touring applications"
+
+# Total fixture count
+total_fixtures: 8
+
+# Fixture groups (matching lx1, lx2, lx3 semantic groups)
+groups:
+  lx1:
+    name: "Front Truss"
+    fixture_count: 3
+    fixture_type: "Robe BMFL Spot"
+    dmx_mode: "mode_1"
+    dmx_channels_per_fixture: 37
+    channel_layout:
+      # Key channels for RGB conversion
+      pan: [1, 2]           # 16-bit (coarse + fine)
+      tilt: [3, 4]          # 16-bit (coarse + fine)
+      dimmer: [22, 23]      # 16-bit (coarse + fine)
+      cyan: 7
+      magenta: 8
+      yellow: 9
+      color_wheel: 10
+      gobo_wheel: 11
+      shutter: 21
+    capabilities:
+      pan_range: 540        # degrees
+      tilt_range: 280       # degrees
+      color_system: "CMY"   # Subtractive mixing
+      dimmer_bits: 16
+      has_color_wheel: true
+      has_gobo: true
+
+  lx2:
+    name: "Mid Truss"
+    fixture_count: 3
+    fixture_type: "Robe BMFL Spot"
+    dmx_mode: "mode_1"
+    dmx_channels_per_fixture: 37
+    channel_layout:
+      pan: [1, 2]
+      tilt: [3, 4]
+      dimmer: [22, 23]
+      cyan: 7
+      magenta: 8
+      yellow: 9
+      color_wheel: 10
+      gobo_wheel: 11
+      shutter: 21
+    capabilities:
+      pan_range: 540
+      tilt_range: 280
+      color_system: "CMY"
+      dimmer_bits: 16
+      has_color_wheel: true
+      has_gobo: true
+
+  lx3:
+    name: "Back Truss / Floor"
+    fixture_count: 2
+    fixture_type: "Robe BMFL Blade"
+    dmx_mode: "mode_2"
+    dmx_channels_per_fixture: 42
+    channel_layout:
+      pan: [1, 2]
+      tilt: [3, 4]
+      dimmer: [26, 27]
+      cyan: 7
+      magenta: 8
+      yellow: 9
+      color_wheel: 10
+      blade_system: [31, 32, 33, 34, 35, 36, 37, 38]  # 4 blades x 2 axes
+      shutter: 25
+    capabilities:
+      pan_range: 540
+      tilt_range: 280
+      color_system: "CMY"
+      dimmer_bits: 16
+      has_blades: true
+      blade_count: 4
+
+# Abstract-to-physical mapping
+mapping:
+  # Virtual LED count used in abstract representation
+  virtual_led_count: 8
+  
+  # How to map virtual LEDs to physical fixtures
+  strategy: "distribute"  # Options: distribute, duplicate, interpolate
+  
+  # For distribute: spread virtual LEDs across fixtures
+  # lx1 has 3 fixtures, 8 virtual -> fixtures get LEDs [0,1,2], [3,4,5], [6,7,0]
+  interpolation: "nearest"  # Options: nearest, linear, cubic
+
+# Color conversion (RGB to CMY)
+color_conversion:
+  method: "rgb_to_cmy_subtractive"
+  formulas:
+    cyan: "1.0 - R"
+    magenta: "1.0 - G"
+    yellow: "1.0 - B"
+  # White point calibration (fixture specific)
+  white_point: [1.0, 1.0, 1.0]
+  # Saturation boost to compensate for CMY limitations
+  saturation_boost: 1.1
+
+# Position presets (used for pan/tilt when position is specified)
+position_presets:
+  Pos01:
+    description: "Center Stage"
+    pan: 0.5
+    tilt: 0.5
+  Pos02:
+    description: "Stage Left"
+    pan: 0.25
+    tilt: 0.5
+  Pos03:
+    description: "Stage Right"
+    pan: 0.75
+    tilt: 0.5
+  Pos04:
+    description: "Audience"
+    pan: 0.5
+    tilt: 0.7
+
+# Re-extraction configuration
+extraction:
+  # How to compute PASv01 features from this rig
+  intensity_source: "dimmer"  # Use dimmer channel for intensity
+  color_source: "cmy_to_rgb"  # Convert CMY back to RGB for hue/sat
+  spatial_resolution: 8       # Downsample to N virtual positions

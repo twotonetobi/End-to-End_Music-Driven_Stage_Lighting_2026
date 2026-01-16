@@ -1,0 +1,126 @@
+# Rig B: GLP LED Bar Array
+# Linear pixel-controllable wash fixtures for wall/floor effects
+
+name: "Rig B - LED Bar Array"
+description: "12x GLP X4 Bar 20 fixtures in wash configuration for architectural/festival applications"
+
+# Total fixture count
+total_fixtures: 12
+
+# Fixture groups (matching lx1, lx2, lx3 semantic groups)
+groups:
+  lx1:
+    name: "Floor Wash Left"
+    fixture_count: 4
+    fixture_type: "GLP Impression X4 Bar 20"
+    dmx_mode: "full_pixel"
+    dmx_channels_per_fixture: 89
+    pixels_per_fixture: 20
+    channel_layout:
+      # Master channels
+      master_dimmer: 1
+      strobe: 2
+      # Per-pixel layout (4 channels each: R, G, B, W)
+      pixel_start: 5
+      channels_per_pixel: 4
+      # Color order
+      color_order: "RGBW"
+    capabilities:
+      color_system: "RGBW"
+      dimmer_bits: 8
+      has_pixel_control: true
+      pixel_count: 20
+      zoom_range: null  # Fixed optics
+
+  lx2:
+    name: "Floor Wash Right"
+    fixture_count: 4
+    fixture_type: "GLP Impression X4 Bar 20"
+    dmx_mode: "full_pixel"
+    dmx_channels_per_fixture: 89
+    pixels_per_fixture: 20
+    channel_layout:
+      master_dimmer: 1
+      strobe: 2
+      pixel_start: 5
+      channels_per_pixel: 4
+      color_order: "RGBW"
+    capabilities:
+      color_system: "RGBW"
+      dimmer_bits: 8
+      has_pixel_control: true
+      pixel_count: 20
+
+  lx3:
+    name: "Wall Wash"
+    fixture_count: 4
+    fixture_type: "GLP Impression X4 Bar 20"
+    dmx_mode: "full_pixel"
+    dmx_channels_per_fixture: 89
+    pixels_per_fixture: 20
+    channel_layout:
+      master_dimmer: 1
+      strobe: 2
+      pixel_start: 5
+      channels_per_pixel: 4
+      color_order: "RGBW"
+    capabilities:
+      color_system: "RGBW"
+      dimmer_bits: 8
+      has_pixel_control: true
+      pixel_count: 20
+
+# Abstract-to-physical mapping
+mapping:
+  # Virtual LED count used in abstract representation
+  virtual_led_count: 8
+  
+  # Physical LEDs per group (4 fixtures x 20 pixels)
+  physical_leds_per_group: 80
+  
+  # How to map virtual LEDs to physical pixels
+  strategy: "interpolate"  # Smooth interpolation across pixel array
+  interpolation: "linear"
+  
+  # Optional: pixel grouping for performance
+  pixel_decimation: 4  # Group every 4 pixels (20 -> 5 virtual points per fixture)
+
+# Color conversion (RGB to RGBW)
+color_conversion:
+  method: "rgb_to_rgbw_hybrid"
+  # RGBW conversion strategy
+  # Option 1: "white_extraction" - extract white component
+  # Option 2: "saturation_preserve" - preserve color saturation
+  strategy: "white_extraction"
+  formulas:
+    # Simple white extraction
+    white: "min(R, G, B)"
+    red: "R - W"
+    green: "G - W"
+    blue: "B - W"
+  # Alternatively, for saturation preservation:
+  # white: "min(R, G, B) * (1 - saturation)"
+  white_boost: 0.3  # Boost white for brightness
+
+# Position presets (not used for bars, but included for compatibility)
+position_presets:
+  Pos01:
+    description: "Full Bar"
+    coverage: [0.0, 1.0]
+  Pos02:
+    description: "Left Half"
+    coverage: [0.0, 0.5]
+  Pos03:
+    description: "Right Half"
+    coverage: [0.5, 1.0]
+  Pos04:
+    description: "Center Spot"
+    coverage: [0.3, 0.7]
+
+# Re-extraction configuration
+extraction:
+  intensity_source: "pixel_brightness"
+  color_source: "rgbw_to_rgb"
+  spatial_resolution: 8
+  # For bars: use pixel positions for spatial gradient
+  use_pixel_positions: true

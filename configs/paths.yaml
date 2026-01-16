@@ -1,0 +1,151 @@
+# =============================================================================
+# Data Paths Configuration - Paper Evaluation Pipeline
+# =============================================================================
+# All paths are absolute to ensure reproducibility
+# Last updated: 2026-01-13
+#
+# This file contains all data paths needed for Table 2 and Table 3 evaluation.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# INFERENCE DATA (Model Outputs)
+# -----------------------------------------------------------------------------
+# Both models output pickle files with shape (frames, 61) per song segment
+# Pickle files are named: {Song_Name}_part_{NN}_{label}.pkl
+# Example: Avicii_-_Levels_-_Radio_Edit_part_03_chorus.pkl
+
+inference_data:
+  # Diffusion model output (PASv02-like intention features)
+  # 265 pickle files, one per song segment
+  # Data layout: 10 groups x 6 features = 60 features + 1 extra
+  # PASv02 features per group: [I_peak, nabla_s_I, rho_peak, I_min_inv, H_bar, S_bar]
+  diffusion: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/InferenceSet_ConformerModelNoRF_2024-11_seed150"
+  
+  # Oscillator model output (GeoApproach parametric patches)
+  # 265 pickle files, matching segments with diffusion output
+  # Data layout: 6 luminaire groups (3 standard + 3 highlight) x 10 features = 60 features
+  # GeoApproach features per group: [pan_act, tilt_act, wave_a, wave_b, freq, amp, offset, phase, hue, sat]
+  # 
+  # IMPORTANT: Data is organized as:
+  #   [0:10]   lx1_standard
+  #   [10:20]  lx1_highlight (NOT used in evaluation)
+  #   [20:30]  lx2_standard
+  #   [30:40]  lx2_highlight (NOT used in evaluation)
+  #   [40:50]  lx3_standard
+  #   [50:60]  lx3_highlight (NOT used in evaluation)
+  oscillator: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/InferenceSet_ConforModelNoRFSet_2025-01_seed150"
+
+# -----------------------------------------------------------------------------
+# SONG METADATA
+# -----------------------------------------------------------------------------
+# JSON files containing BPM, beats, downbeats, and segment boundaries
+# One JSON file per song (51 songs total)
+# Example content:
+#   {
+#     "path": "Song_Name.wav",
+#     "bpm": 125,
+#     "beats": [0.01, 0.47, 0.95, ...],
+#     "downbeats": [0.01, 1.9, 3.8, ...],
+#     "beat_positions": [1, 2, 3, 4, ...],
+#     "segments": [{"start": 0.0, "end": 22.85, "label": "intro"}, ...]
+#   }
+song_timings: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/Audio_90s_Inference_Set_SongTimings"
+
+# -----------------------------------------------------------------------------
+# AUDIO FILES
+# -----------------------------------------------------------------------------
+# Full song audio files (WAV format)
+# Used for optional audio-based analysis (SSM computation, beat detection verification)
+audio_files_full: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/Audio_90s_Inference_Set"
+
+# Pre-split audio segments (WAV format)
+# Each segment is a separate file: {Song_Name}_part_{NN}_{label}.wav
+# Example: Avicii_-_Levels_-_Radio_Edit_part_03_chorus.wav
+# These correspond 1:1 with the inference pickle files
+audio_files_parts: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/Audio_90s_Inference_Set_parts"
+
+# Alias for audio_files_parts (shorter name used in scripts)
+audio_parts: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/Audio_90s_Inference_Set_parts"
+
+# -----------------------------------------------------------------------------
+# LIGHTING CONTROL (WebUI Feature Store)
+# -----------------------------------------------------------------------------
+# JSON files containing saved feature states from WebUI editing sessions
+# Format: {song_name}_{segment_id}.json
+# NOT needed for evaluation - these are runtime parameters
+lighting_controls: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/AudioSegment_LightControl_JSONs"
+
+# WebUI feature store (same as above, different path reference)
+webui_feature_store: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/TD/GeoApproach/Touchdesigner/assets_GeoApproach/webUI_feature_store"
+
+# -----------------------------------------------------------------------------
+# OUTPUT DIRECTORY
+# -----------------------------------------------------------------------------
+output_dir: "./outputs"
+
+# -----------------------------------------------------------------------------
+# EXTERNAL CODE REFERENCES (Documentation Only)
+# -----------------------------------------------------------------------------
+# These paths are for reference/documentation purposes
+# The evaluation pipeline ports this logic to standalone Python
+external_references:
+  # TouchDesigner back-converter script (reference implementation)
+  # Contains wave functions, decision logic, RGB generation
+  # Uses TouchDesigner op() calls - must be ported for offline use
+  td_backconverter: "./assets/dat_AL_Backconverter_small__td_55930_1.py"
+  
+  # Abstraction layer implementation (PASv01, STDv01, PXLv01)
+  # Used for re-extracting intention features from rendered DMX
+  abstraction_layers: "/Users/chetbaker/work/i_0002_MaschinenLicht/36_software/alternator_v1.3/Sources/Preprocessing/Light/AbstractionLayers.py"
+  
+  # Existing evaluation scripts (SSM, beat alignment, hybrid evaluation)
+  # Can be adapted for Table 2 and Table 3 metrics
+  existing_evaluators: "/Users/chetbaker/work/edu_0003_Master_DR/Master_Thesis/assets/evaluation/scripts"
+  
+  # Paper LaTeX source
+  paper_source: "/Users/chetbaker/work/edu_0003_Master_DR/Master_Thesis/Paper_out_of_MasterThesis/Paper_out_of_MasterThesis03/main_lncs.tex"
+  
+  # Experiment guide with detailed protocol
+  experiment_guide: "/Users/chetbaker/work/edu_0003_Master_DR/Master_Thesis/Paper_out_of_MasterThesis/Paper_out_of_MasterThesis03/EXPERIMENT_GUIDE.md"
+
+# -----------------------------------------------------------------------------
+# PROCESSING PARAMETERS
+# -----------------------------------------------------------------------------
+processing:
+  fps: 30                          # Frame rate for all processing
+  led_count: 33                    # Physical LED count per group
+  virtual_led_count: 8             # Virtual luminaire groups
+  max_cycles_per_second: 4.0       # Maximum wave frequency
+  max_phase_cycles_per_second: 8.0 # Maximum phase movement speed
+  
+  # Decision boundaries for wave type selection
+  # (from TouchDesigner config, default values)
+  decision_boundaries:
+    intensity_range_threshold: 0.1   # Below this -> "still"
+    dynamic_threshold_sine: 0.3      # Below this -> "sine"
+    dynamic_threshold_pwm: 0.5       # Below this -> "pwm_basic"
+    dynamic_threshold_extended: 0.7  # Below this -> "pwm_extended"
+    dynamic_threshold_odd_even: 0.9  # Below this -> "odd_even"
+    # Above all thresholds -> "square" or "random" (BPM dependent)
+  
+  # BPM thresholds for behavior adjustment
+  bpm_thresholds:
+    low: 80     # Below: slower movement (bpm_scale = 0.5)
+    high: 135   # Above: faster movement (bpm_scale = 2.0)
+
+# -----------------------------------------------------------------------------
+# EVALUATION CONFIGURATION
+# -----------------------------------------------------------------------------
+evaluation:
+  # Table 2: Cross-Rig Retargeting Fidelity
+  table2:
+    rigs: ["rig_a_bmfl", "rig_b_bars", "rig_c_mixed"]
+    metrics: ["intention_corr", "hue_error", "sat_mae", "beat_align_delta"]
+  
+  # Table 3: Ablation and Baseline Comparison
+  table3:
+    conditions: ["full", "diffusion_only", "oscillator_only", "retrieval"]
+    metrics: ["ssm_corr", "novelty_corr", "beat_align", "trans_smooth"]
+  
+  # Note: Highlights are NOT used in evaluation
+  use_highlights: false
